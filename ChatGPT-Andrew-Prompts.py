@@ -9,7 +9,7 @@ from openai import OpenAI
 st.set_page_config(page_title="Andrew Ng")
 
 assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
-client = OpenAI(api_key = st.secrets["openai_key"])
+client = OpenAI(openai.api_key = st.secrets["openai_api"])
 
 prompt = PromptTemplate(
     input_variables=["chat_history", "question"],
@@ -22,7 +22,7 @@ prompt = PromptTemplate(
     AI:"""
 )
 
-llm = ChatOpenAI(openai_api_key = st.secrets["openai_api_key"])
+llm = ChatOpenAI(openai.api_key = st.secrets["openai_api"])
 memory = ConversationBufferWindowMemory(memory_key="chat_history", k=4)
 llm_chain = LLMChain(
     llm = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::93Td8brn", temperature=0),
