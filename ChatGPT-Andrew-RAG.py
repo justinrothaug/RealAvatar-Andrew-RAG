@@ -15,7 +15,7 @@ client = OpenAI(api_key= st.secrets["openai_key"])
 def get_chatassistant_chain():
     loader = CSVLoader(file_path="./docs/DLScripts.csv")
     documents = loader.load()
-    embeddings_model = OpenAIEmbeddings(openai.api_key= client)
+    embeddings_model = OpenAIEmbeddings(client)
     vectorstore = FAISS.from_documents(documents, embeddings_model)
     llm = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::93Td8brn", temperature=1)
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True) 
