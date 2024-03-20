@@ -1,0 +1,11 @@
+altair
+pandas
+streamlit
+openai
+langchain==0.1.5
+langchain-community==0.0.18
+langchain-core==0.1.19
+langchain-openai==0.0.6
+langsmith==0.0.87
+faiss-cpu
+tabulate
