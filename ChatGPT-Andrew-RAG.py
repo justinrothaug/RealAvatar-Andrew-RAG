@@ -15,8 +15,15 @@ print (client)
 #client = OpenAI(api_key= st.secrets["openai_key"])
 
 def get_chatassistant_chain():
+    #Load the CSV
     loader = CSVLoader(file_path="./docs/DLScripts.csv")
     documents = loader.load()
+    
+    #Split the CSV into chunks for
+    text_splitter = CharacterTextSplitter(chunk_size=512, chunk_overlap=0)
+    texts = text_splitter.split_documents(documents)
+
+    #Send it offwards to embedding
     embeddings_model = OpenAIEmbeddings(openai_api_key=client)
     vectorstore = FAISS.from_documents(documents, embeddings_model)
     llm = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::93Td8brn", temperature=1)
