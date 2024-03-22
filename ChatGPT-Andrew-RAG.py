@@ -10,7 +10,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI
 
-client =st.secrets["openai_key"]
+client = OpenAI(api_key= st.secrets["openai_key"])
 #client = OpenAI(api_key= st.secrets["openai_key"])
 
 def get_chatassistant_chain():
