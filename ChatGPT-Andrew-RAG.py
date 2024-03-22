@@ -10,6 +10,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI
 
+
 client = OpenAI(api_key= st.secrets["openai_key"])
 
 def get_chatassistant_chain():
@@ -19,7 +20,7 @@ def get_chatassistant_chain():
     vectorstore = FAISS.from_documents(documents, embeddings_model)
     llm = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::93Td8brn", temperature=1)
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True) 
-    chain = ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(openai.api_key= client),
+    chain = ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(client),
                                                   retriever=vectorstore.as_retriever(),
                                                   memory=memory)                                      
     return chain
