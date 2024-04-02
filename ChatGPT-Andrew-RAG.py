@@ -27,6 +27,13 @@ client = OpenAI(api_key= st.secrets["openai_key"])
 chat = ChatOpenAI(
     openai_api_key=st.secrets["openai_key"]
 )
+
+from langchain.vectorstores.pinecone import Pinecone
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
+os.environ['PINECONE_API_KEY'] = st.secrets["PINECONE_API_KEY"] 
+
+
 # Define your custom prompt template
 template = """
 
