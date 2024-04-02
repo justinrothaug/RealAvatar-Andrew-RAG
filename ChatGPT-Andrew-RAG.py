@@ -59,7 +59,8 @@ def get_chatassistant_chain():
     texts = text_splitter.split_documents(documents)
     
     embeddings_model = OpenAIEmbeddings(openai_api_key=st.secrets["openai_key"])
-    vectorstore = FAISS.from_documents(texts, embeddings_model)
+    #vectorstore = FAISS.from_documents(texts, embeddings_model)
+    vectorstore = PineconeVectorStore(index_name="realavatar", embedding=embeddings)
     llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=1)
     memory=ConversationBufferMemory(memory_key='chat_history', return_messages=True)
     chain=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore.as_retriever(), memory=memory,combine_docs_chain_kwargs={"prompt": QA_PROMPT})
