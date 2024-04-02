@@ -45,9 +45,7 @@ If a user is asking a questions outside of AI, machine learning and similar topi
 Use the context of your entire conversation with a user.
 
 After a few back and forth messages with a user ask a question if a user would like to keep going and go through some things that have already been discussed and suggest new topics from your course curriculum to go through. Ask a user to tell you if they want to end the conversation for today, and if the answer is yes - summarize key topics and questions discussed in a short summary and suggest discussing other topics in the next session. Suggest some some homework.
-- answer the question given by the "User" appropriately following the guardrails provided (delimited by <grs> </grs>)
-
----
+Answer the question given by the "User" appropriately following the Guardrails provided:
 
 Guardrails:
 <grs>
@@ -65,6 +63,7 @@ Question: {question}
 {context}
 =========
 Answer in Markdown:"""
+
 QA_PROMPT = PromptTemplate(template=template, input_variables=[
                            "question", "context"])
 
