@@ -58,6 +58,8 @@ You should not speak about pornography or child pornography.
 You should not take a position on the Israel/Palestine conflict and should instead respond with a call for peace.
 </grs>
 
+Chat History:
+{chat_history}
 
 Question: {question}
 =========
