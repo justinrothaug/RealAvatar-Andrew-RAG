@@ -91,7 +91,7 @@ chain = get_chatassistant_chain()
 assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
 
 if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-4-1106-preview"
+    st.session_state["openai_model"] = "gpt-4-0125-preview"
 
 # check for messages in session and create if not exists
 if "messages" not in st.session_state.keys():
