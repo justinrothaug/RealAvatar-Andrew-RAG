@@ -26,7 +26,7 @@ assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30N
 #Add Keys
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]    
 client = OpenAI(api_key= st.secrets["openai_key"])
-#chat = ChatOpenAI(openai_api_key=st.secrets["openai_key"])
+chat = ChatOpenAI(openai_api_key=st.secrets["openai_key"])
 os.environ['PINECONE_API_KEY'] = st.secrets["PINECONE_API_KEY"] 
 
 
