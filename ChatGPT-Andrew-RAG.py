@@ -140,7 +140,7 @@ print (chain_GPT)
 def get_chatassistant_chain(): 
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L12-v2", model_kwargs={'device': 'cpu'})
     vectorstore = PineconeVectorStore(index_name="realavatar-huggingface", embedding=embeddings)
-    llm = ChatAnthropic(temperature=0, anthropic_api_key=api_key, model_name="claude-3-opus-20240229", model_kwargs=dict(system=claude_prompt_template))
+    llm = ChatAnthropic(temperature=1, anthropic_api_key=api_key, model_name="claude-3-opus-20240229", model_kwargs=dict(system=claude_prompt_template))
     chain=ConversationalRetrievalChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(), memory=memory)
     return chain
 chain = get_chatassistant_chain()
