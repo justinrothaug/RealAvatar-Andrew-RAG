@@ -12,6 +12,12 @@ sentence_transformers
 replicate
 
 #Depricated
+#dvc
+#dvc-s3
+#pydub
+#librosa
+#grpcio
+#sounddevice
 #torch
 #accelerate
 #streamlit_chat
