@@ -121,7 +121,7 @@ Question: {question}
 
 # Create a PromptTemplate with Context
 Prompt_Claude = PromptTemplate(template=claude_prompt_template,input_variables=["context", "question","chat_history"])
-Prompt_GPT = PromptTemplate(template=gpt_prompt_template, input_variables=["question", "context", "chat_history"])
+Prompt_GPT = PromptTemplate(template=GPT_prompt_template, input_variables=["question", "context", "chat_history"])
 
 # Add in Chat Memory
 msgs = StreamlitChatMessageHistory()
