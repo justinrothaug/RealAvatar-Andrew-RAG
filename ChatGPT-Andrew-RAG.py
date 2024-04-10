@@ -2,6 +2,7 @@ import os
 import streamlit as st
 # Importing OpenAI
 from openai import OpenAI
+from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
