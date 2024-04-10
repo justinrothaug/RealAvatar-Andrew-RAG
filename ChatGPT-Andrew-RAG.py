@@ -71,7 +71,6 @@ memory=ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, ret
 # ChatGPT Chain
 def get_chatassistant_chain():    
     embeddings_model = OpenAIEmbeddings(openai_api_key=st.secrets["openai_key"])
-    #vectorstore = FAISS.from_documents(texts, embeddings_model)
     vectorstore = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings_model)
     llm = ChatOpenAI(model="gpt-4-0125-preview", temperature=1)
     chain=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore.as_retriever(), memory=memory,combine_docs_chain_kwargs={"prompt": QA_PROMPT})
