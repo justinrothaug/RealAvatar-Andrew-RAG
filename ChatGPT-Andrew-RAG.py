@@ -1,43 +1,36 @@
+import os
+import streamlit as st
+# Importing OpenAI
 from openai import OpenAI
-import streamlit as st
-import streamlit as st
-from langchain.document_loaders.csv_loader import CSVLoader
+from langchain_openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from langchain.chains import ConversationChain
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
-from langchain_community.callbacks import get_openai_callback
-from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain_openai import OpenAI
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.prompts import PromptTemplate
+from langchain_community.callbacks import get_openai_callback
 # Importing Eleven Labs
-from elevenlabs.client import ElevenLabs
+cfrom elevenlabs.client import ElevenLabs
 from elevenlabs import play
-# Importing Speech Recognition
-import speech_recognition as sr
-import time
-import os
-st.set_page_config(page_title="Andrew AI")
-
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]    
-client = OpenAI(api_key= st.secrets["openai_key"])
-chat = ChatOpenAI(
-    openai_api_key=st.secrets["openai_key"]
-)
-
+# Importing Pinecone
 from langchain.vectorstores.pinecone import Pinecone
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone
+
+#Set up the Environment
+st.set_page_config(page_title="Andrew AI")
+assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
+
+#Add Keys
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]    
+client = OpenAI(api_key= st.secrets["openai_key"])
+chat = ChatOpenAI(openai_api_key=st.secrets["openai_key"])
 os.environ['PINECONE_API_KEY'] = st.secrets["PINECONE_API_KEY"] 
 
 
-# Define your custom prompt template
+# Define our Prompt Template
 template = """
-
 You are Andrew Ng. You're given the context of a document that is a database of your teachings and course curriculum, use it for answering the user’s questions accordingly.  
 You can only talk about AI, machine learning and the details within the document. Do not make up an answer if you can't find related details within the document.
 Keep your responses to no longer than 300-500 characters. 
@@ -67,34 +60,29 @@ Question: {question}
 {context}
 =========
 """
-
 QA_PROMPT = PromptTemplate(template=template, input_variables=[
                            "question", "context", "chat_history"])
 
+# Add in Chat Memory
 msgs = StreamlitChatMessageHistory()
 memory=ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True, output_key='answer')
 
-def get_chatassistant_chain():
-    #loader = CSVLoader(file_path="RAG-Andrew2.csv", encoding="utf8")
-    #documents = loader.load()
-    #text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-    #texts = text_splitter.split_documents(documents)
-    
+
+# ChatGPT Chain
+def get_chatassistant_chain():    
     embeddings_model = OpenAIEmbeddings(openai_api_key=st.secrets["openai_key"])
     #vectorstore = FAISS.from_documents(texts, embeddings_model)
     vectorstore = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings_model)
     llm = ChatOpenAI(model="gpt-4-0125-preview", temperature=1)
     chain=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore.as_retriever(), memory=memory,combine_docs_chain_kwargs={"prompt": QA_PROMPT})
     return chain
-
 chain = get_chatassistant_chain()
 
-assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
 
+# Chat Mode
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4-0125-preview"
 
-# check for messages in session and create if not exists
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello!👋 I'm Andrew Ng, a professor at Stanford University specializing in AI. How can I help you today?"}
@@ -106,13 +94,10 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
         
-#user_prompt = st.chat_input()
-
 if user_prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": user_prompt})
     with st.chat_message("user"):
         st.markdown(user_prompt)
-
 
     with st.chat_message("assistant", avatar=assistant_logo):
         message_placeholder = st.empty()
@@ -120,7 +105,7 @@ if user_prompt := st.chat_input("What is up?"):
         message_placeholder.markdown(response['answer'])
         print (chain)
 
-        
+##Can't get this to work in Streamlit
         #ElevelLabs API Call and Return
         #text = str(response['answer'])
         #audio = client2.generate(
