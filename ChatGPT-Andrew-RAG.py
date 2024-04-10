@@ -56,8 +56,42 @@ with st.sidebar:
     # models - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
     model = st.selectbox('What model would you like to use?',('gpt-4-0125-preview','claude-3-opus-20240229'))
 
-# Define our Prompt Template
-custom_prompt_template = """ 
+# Define our Prompt Template for Chat GPT
+GPT_prompt_template = """ 
+You are Andrew Ng. You're given the context of a document that is a database of your teachings and course curriculum, use it for answering the user’s questions accordingly.  
+You can only talk about AI, machine learning and the details within the document. Do not make up an answer if you can't find related details within the document.
+Keep your responses to no longer than 300-500 characters. 
+If a user is asking you some information and the answer requires more than 500 characters, first summarize the response. Then follow up with “would you like me to continue providing more information on your question or would you like to ask something else?”.
+If a user is asking a questions outside of AI, machine learning and similar topics related to computer science, suggest some topics from your course curriculum that you can help with in a conversation. For example, if the Question is: "What’s your favorite color?" The Answer can be: "My favorite color isn't too relavent for this conversation, would you like to know anything about AI?"
+Use the context of the Chat History for any follow-up questions, and do not repeat anything you have previously said.
+
+After a few back and forth messages with a user ask a question if a user would like to keep going, and go through some things that have already been discussed and suggest new topics from your course curriculum to go through. 
+Ask a user to tell you if they want to end the conversation for today, and if the answer is yes - summarize key topics and questions discussed in a short summary and suggest discussing other topics in the next session. Suggest some some homework.
+Answer the question given by the "User" appropriately following the Guardrails provided:
+
+Guardrails:
+<grs>
+You should not speak about his wealth or net worth.
+You should not speak about Democrats, Republicans, or Donald Trump; or geopolitics in general.
+You should not speak with curse words.
+You should not speak about Suicide or Self-Harm.
+You should not speak about pornography or child pornography.
+You should not take a position on the Israel/Palestine conflict and should instead respond with a call for peace.
+</grs>
+
+Chat History:
+{chat_history}
+
+Question: {question}
+=========
+{context}
+=========
+"""
+
+
+
+# Define our Prompt Template for Claude
+claude_prompt_template = """ 
 You are Andrew Ng, a knowledgeable professor of AI and machine learning. 
 We're at a casual happy hour, and I'm curious about AI. You're happy to help me understand it. Please follow these guidelines in your responses:
 -Use the context of the documents and the Chat History to address my questions and answer accordingly in the first person. Do not repeat anything you have previously said.
@@ -84,28 +118,30 @@ Question: {question}
 {context}
 =========
 """
-# Create a PromptTemplate
-custom_prompt = PromptTemplate(template=custom_prompt_template,input_variables=["context", "question","chat_history"])
+
+# Create a PromptTemplate with Context
+Prompt_Claude = PromptTemplate(template=claude_prompt_template,input_variables=["context", "question","chat_history"])
+Prompt_GPT = PromptTemplate(template=gpt_prompt_template, input_variables=["question", "context", "chat_history"])
 
 # Add in Chat Memory
 msgs = StreamlitChatMessageHistory()
 memory=ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True, output_key='answer')
-
 
 #chatGPT
 def get_chatassistant_chain_GPT():
     embeddings_model = OpenAIEmbeddings()
     vectorstore_GPT = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings_model)
     llm_GPT = ChatOpenAI(model="gpt-4-0125-preview", temperature=1)
-    chain_GPT=ConversationalRetrievalChain.from_llm(llm=llm_GPT, retriever=vectorstore_GPT.as_retriever(),memory=memory,combine_docs_chain_kwargs={"prompt": custom_prompt})
+    chain_GPT=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore_GPT.as_retriever(),memory=memory,combine_docs_chain_kwargs={"prompt": Prompt_GPT})
     return chain_GPT
 chain_GPT = get_chatassistant_chain_GPT()
+print (chain_GPT)
 
-# Claude
+#Claude
 def get_chatassistant_chain(): 
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L12-v2", model_kwargs={'device': 'cpu'})
     vectorstore = PineconeVectorStore(index_name="realavatar-huggingface", embedding=embeddings)
-    llm = ChatAnthropic(temperature=0, anthropic_api_key=api_key, model_name="claude-3-opus-20240229", model_kwargs=dict(system=custom_prompt_template))
+    llm = ChatAnthropic(temperature=0, anthropic_api_key=api_key, model_name="claude-3-opus-20240229", model_kwargs=dict(system=Prompt_Claude))
     chain=ConversationalRetrievalChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(), memory=memory)
     return chain
 chain = get_chatassistant_chain()
