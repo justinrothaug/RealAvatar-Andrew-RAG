@@ -54,7 +54,7 @@ with st.sidebar:
     # widget - https://docs.streamlit.io/library/api-reference/widgets/st.selectbox
 
     # models - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
-    model = st.selectbox('What model would you like to use?',('claude-3-opus-20240229','gpt-4-0125-preview'))
+    model = st.selectbox('What model would you like to use?',('gpt-4-0125-preview','claude-3-opus-20240229'))
 
 # Define our Prompt Template
 custom_prompt_template = """ 
@@ -112,8 +112,8 @@ chain = get_chatassistant_chain()
 
 
 # Chat Mode
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-4-0125-preview"
+#if "openai_model" not in st.session_state:
+#    st.session_state["openai_model"] = "gpt-4-0125-preview"
 
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
