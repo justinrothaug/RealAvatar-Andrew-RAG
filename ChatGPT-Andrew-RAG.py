@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 import streamlit as st
 # Importing OpenAI
 from openai import OpenAI
@@ -25,38 +26,37 @@ from anthropic import Anthropic
 # Importing Replicate
 from langchain_community.llms import CTransformers
 from langchain_community.llms import Replicate
-from langchain.embeddings import HuggingFaceEmbeddings
+#from langchain.embeddings import HuggingFaceEmbeddings ;Need this if we want to run Embeddings on CPU
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.globals import set_verbose, set_debug
 
+# Importing Google Vertex
+#from langchain_google_vertexai import VertexAIModelGarden
+
+# Set the path as environment variable
+os.environ['PATH'] = 'C://Users//HP//Desktop'
 
 #Add Keys
-os.environ['CLAUDE_API_KEY'] = st.secrets["CLAUDE_API_KEY"] 
-CLAUDE_API_KEY = st.secrets["CLAUDE_API_KEY"]
-api_key= CLAUDE_API_KEY
-
-os.environ['PINECONE_API_KEY'] = st.secrets["PINECONE_API_KEY"] 
-PINECONE_API_KEY = st.secrets["PINECONE_API_KEY"]
-
-os.environ['REPLICATE_API_TOKEN'] = st.secrets["REPLICATE_API_TOKEN"]
-REPLICATE_API_TOKEN = st.secrets["REPLICATE_API_TOKEN"]
-
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]    
-client = OpenAI(api_key= st.secrets["openai_key"])
-chat = ChatOpenAI(openai_api_key=st.secrets["openai_key"])
+CLAUDE_API_KEY= os.environ['CLAUDE_API_KEY']
+api_key= os.environ['CLAUDE_API_KEY']
+PINECONE_API_KEY= os.environ['PINECONE_API_KEY']
+REPLICATE_API_TOKEN= os.environ['REPLICATE_API_TOKEN']
+OPENAI_API_KEY= os.environ["OPENAI_API_KEY"]
+client= OpenAI(api_key= os.environ["OPENAI_API_KEY"])
+chat= ChatOpenAI(openai_api_key= os.environ["OPENAI_API_KEY"])
 
 #Set up the Environment
 st.set_page_config(page_title="Andrew AI")
 assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
 
-
-# sets up sidebar nav widgets
+# Sidebar to select LLM
 with st.sidebar:   
     st.markdown("# Chat Options")
-    # widget - https://docs.streamlit.io/library/api-reference/widgets/st.selectbox
+    # model names - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
+    model = st.selectbox('What model would you like to use?',('gpt-4-0125-preview','claude-3-opus-20240229', 'llama13b-v2-chat'))
 
-    # models - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
-    model = st.selectbox('What model would you like to use?',('gpt-4-0125-preview','claude-3-opus-20240229'))
 
-# Define our Prompt Template for Chat GPT
+# Define our Prompt Template for GPT
 GPT_prompt_template = """ 
 You are Andrew Ng. You're given the context of a document that is a database of your teachings and course curriculum, use it for answering the user’s questions accordingly.  
 You can only talk about AI, machine learning and the details within the document. Do not make up an answer if you can't find related details within the document.
@@ -89,13 +89,12 @@ Question: {question}
 """
 
 
-
 # Define our Prompt Template for Claude
 claude_prompt_template = """ 
-You are Andrew Ng, a knowledgeable professor of AI and machine learning. Do not use emojis or start your message with things like "smiles".
+You are Andrew Ng, a knowledgeable professor of AI and machine learning. 
 We're at a casual happy hour, and I'm curious about AI. You're happy to help me understand it. Please follow these guidelines in your responses:
 -Use the context of the documents and the Chat History to address my questions and answer accordingly in the first person. Do not repeat anything you have previously said.
--Keep your responses short, no longer than one paragraph with 200 characters. Do not use emojis or start your message with things like "smiles".
+-Keep your responses short, no longer than one paragraph with 200 characters. 
 -Ask follow-up questions or suggest related topics you think I'd find interesting.
 -You can talk about other topics broadly, but do not make up any details about Andrew or his beliefs if you can't find the related details within the document.
 -Appropriately following the Guardrails provided:
@@ -119,80 +118,107 @@ Question: {question}
 =========
 """
 
-# Create a PromptTemplate with Context
+# Define our Prompt Template for Llama
+Llama_prompt_template = """ 
+You are Andrew Ng, a knowledgeable professor of AI and machine learning.  Only respond as Andrew.
+We're at a casual happy hour, and I'm curious about AI. You're happy to help me understand it. Please follow these guidelines in your responses:
+-Respond in one short paragraph, with less than 200 characters.
+-Use the context of the documents and the Chat History to address my questions and answer accordingly in the first person. Do not repeat anything you have previously said.
+-Ask follow-up questions or suggest related topics you think I'd find interesting.
+-You can talk about other topics broadly, but do not make up any details about Andrew or his beliefs if you can't find the related details within the document.
+
+Chat History:
+{chat_history}
+
+Question: {question}
+=========
+{context}
+=========
+"""
+
+# In case we want different Prompts for GPT and Llama
 Prompt_GPT = PromptTemplate(template=GPT_prompt_template, input_variables=["question", "context", "chat_history"])
+Prompt_Llama = PromptTemplate(template=Llama_prompt_template, input_variables=["question", "context", "chat_history"])
 
 # Add in Chat Memory
 msgs = StreamlitChatMessageHistory()
 memory=ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True, output_key='answer')
 
+    
+# LLM Section
 #chatGPT
 def get_chatassistant_chain_GPT():
     embeddings_model = OpenAIEmbeddings()
     vectorstore_GPT = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings_model)
+    set_debug(True)
     llm_GPT = ChatOpenAI(model="gpt-4-0125-preview", temperature=1)
     chain_GPT=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore_GPT.as_retriever(),memory=memory,combine_docs_chain_kwargs={"prompt": Prompt_GPT})
     return chain_GPT
 chain_GPT = get_chatassistant_chain_GPT()
-print (chain_GPT)
+
 
 #Claude
 def get_chatassistant_chain(): 
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L12-v2", model_kwargs={'device': 'cpu'})
-    vectorstore = PineconeVectorStore(index_name="realavatar-huggingface", embedding=embeddings)
-    llm = ChatAnthropic(temperature=1, anthropic_api_key=api_key, model_name="claude-3-opus-20240229", model_kwargs=dict(system=claude_prompt_template))
+    embeddings = OpenAIEmbeddings()
+    vectorstore = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings)
+    set_debug(True)
+    llm = ChatAnthropic(temperature=0, anthropic_api_key=api_key, model_name="claude-3-opus-20240229", model_kwargs=dict(system=claude_prompt_template))
     chain=ConversationalRetrievalChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(), memory=memory)
     return chain
 chain = get_chatassistant_chain()
 
 
-# Chat Mode
-#if "openai_model" not in st.session_state:
-#    st.session_state["openai_model"] = "gpt-4-0125-preview"
+#Llama
+def get_chatassistant_chain_Llama():
+    embeddings = OpenAIEmbeddings()
+    vectorstore_Llama = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings)
+    set_debug(True)
+    llm_Llama = Replicate(model="meta/llama-2-70b-chat:2d19859030ff705a87c746f7e96eea03aefb71f166725aee39692f1476566d48",model_kwargs={"max_length":500,"max_new_tokens": 500, "temperature": 1, "top_p": 1, "max_retries": 1})
+    chain_Llama=ConversationalRetrievalChain.from_llm(llm=llm_Llama, retriever=vectorstore_Llama.as_retriever(),memory=ConversationBufferMemory(memory_key="chat_history"),combine_docs_chain_kwargs={"prompt": Prompt_Llama}, max_tokens_limit=3000)
+    return chain_Llama
+chain_Llama = get_chatassistant_chain_Llama()
+#Here's a few different Open Source models we can swap out from Replica if we want:
+#meta/llama-2-70b-chat:2d19859030ff705a87c746f7e96eea03aefb71f166725aee39692f1476566d48
+#mistralai/mixtral-8x7b-instruct-v0.1:cf18decbf51c27fed6bbdc3492312c1c903222a56e3fe9ca02d6cbe5198afc10
+#nateraw/nous-hermes-2-solar-10.7b:1e918ab6ffd5872c21fba21a511f344fd12ac0edff6302c9cd260395c7707ff4
 
+
+
+# Chat Mode
+#Intro and set-up the Chat History
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello!👋 I'm Andrew Ng, a professor at Stanford University specializing in AI. How can I help you today?"}
     ]
 if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
     msgs.clear()
-    
+
+#Define what chain to run based on the model selected
+if model == "llama13b-v2-chat":
+    chain=chain_Llama
 if model == "gpt-4-0125-preview":
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-        
-    if user_prompt := st.chat_input("What is up?"):
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        with st.chat_message("user"):
-            st.markdown(user_prompt)
-
-        with st.chat_message("assistant", avatar=assistant_logo):
-            message_placeholder = st.empty()
-            print(model)
-            response = chain_GPT.invoke({"question": user_prompt})
-            message_placeholder.markdown(response['answer'])        
-        st.session_state.messages.append({"role": "assistant", "content": response['answer']})
-
-
+    chain=chain_GPT
 if model == "claude-3-opus-20240229":
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-        
-    if user_prompt := st.chat_input("What is up?"):
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        with st.chat_message("user"):
-            st.markdown(user_prompt)
+    chain=chain
 
-        with st.chat_message("assistant", avatar=assistant_logo):
-            message_placeholder = st.empty()
-            print(model)
-            response = chain.invoke({"question": user_prompt})
-            message_placeholder.markdown(response['answer'])        
-        st.session_state.messages.append({"role": "assistant", "content": response['answer']})
+#Start Chat and Response
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
         
-##Can't get this to work in Streamlit
+if user_prompt := st.chat_input("What is up?"):
+    st.session_state.messages.append({"role": "user", "content": user_prompt})
+    with st.chat_message("user"):
+        st.markdown(user_prompt)
+
+    with st.chat_message("assistant", avatar=assistant_logo):
+        message_placeholder = st.empty()
+        response = chain.invoke({"question": user_prompt})
+        message_placeholder.markdown(response['answer'])        
+    st.session_state.messages.append({"role": "assistant", "content": response['answer']})
+
+
+##Can't get ElevenLabs to work in Streamlit
         #ElevelLabs API Call and Return
         #text = str(response['answer'])
         #audio = client2.generate(
