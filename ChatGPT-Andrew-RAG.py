@@ -53,7 +53,7 @@ assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30N
 with st.sidebar:   
     st.markdown("# Chat Options")
     # model names - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
-    model = st.selectbox('What model would you like to use?',('gpt-4-0125-preview','claude-3-opus-20240229', 'llama13b-v2-chat'))
+    model = st.selectbox('What model would you like to use?',('gpt-4-turbo','claude-3-opus-20240229', 'llama-2-70b-chat'))
 
 
 # Define our Prompt Template for GPT
@@ -151,7 +151,7 @@ def get_chatassistant_chain_GPT():
     embeddings_model = OpenAIEmbeddings()
     vectorstore_GPT = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings_model)
     set_debug(True)
-    llm_GPT = ChatOpenAI(model="gpt-4-0125-preview", temperature=1)
+    llm_GPT = ChatOpenAI(model="gpt-4-turbo", temperature=1)
     chain_GPT=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore_GPT.as_retriever(),memory=memory,combine_docs_chain_kwargs={"prompt": Prompt_GPT})
     return chain_GPT
 chain_GPT = get_chatassistant_chain_GPT()
@@ -194,9 +194,9 @@ if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
     msgs.clear()
 
 #Define what chain to run based on the model selected
-if model == "llama13b-v2-chat":
+if model == "llama-2-70b-chat":
     chain=chain_Llama
-if model == "gpt-4-0125-preview":
+if model == "gpt-4-turbo":
     chain=chain_GPT
 if model == "claude-3-opus-20240229":
     chain=chain
