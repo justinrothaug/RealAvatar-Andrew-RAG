@@ -10,6 +10,7 @@ elevenlabs
 langchain-anthropic
 sentence_transformers
 replicate
+dotenv
 
 #Depricated
 #dvc
