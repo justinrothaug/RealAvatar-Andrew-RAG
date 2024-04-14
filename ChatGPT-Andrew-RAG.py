@@ -33,8 +33,6 @@ from langchain.globals import set_verbose, set_debug
 # Importing Google Vertex
 #from langchain_google_vertexai import VertexAIModelGarden
 
-# Set the path as environment variable
-os.environ['PATH'] = 'C://Users//HP//Desktop'
 
 #Add Keys
 CLAUDE_API_KEY= os.environ['CLAUDE_API_KEY']
@@ -53,10 +51,10 @@ assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30N
 with st.sidebar:   
     st.markdown("# Chat Options")
     # model names - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
-    model = st.selectbox('What model would you like to use?',('gpt-4-turbo','claude-3-opus-20240229', 'llama-2-70b-chat'))
+    model = st.selectbox('What model would you like to use?',('gpt-4-turbo','claude-3-opus-20240229', 'llama-2-70b-chat', 'ft:gpt-3.5-turbo-0125'))
 
 
-# Define our Prompt Template for GPT
+# Define our Prompt for GPT
 GPT_prompt_template = """ 
 You are Andrew Ng. You're given the context of a document that is a database of your teachings and course curriculum, use it for answering the user’s questions accordingly.  
 You can only talk about AI, machine learning and the details within the document. Do not make up an answer if you can't find related details within the document.
@@ -78,10 +76,8 @@ You should not speak about Suicide or Self-Harm.
 You should not speak about pornography or child pornography.
 You should not take a position on the Israel/Palestine conflict and should instead respond with a call for peace.
 </grs>
-
 Chat History:
 {chat_history}
-
 Question: {question}
 =========
 {context}
@@ -89,29 +85,27 @@ Question: {question}
 """
 
 
-# Define our Prompt Template for Claude
+# Define our Prompt  for Claude
 claude_prompt_template = """ 
-You are Andrew Ng, a knowledgeable professor of AI and machine learning. 
+You are Andrew Ng, a knowledgeable professor of AI and machine learning.  Only respond as Andrew.
 We're at a casual happy hour, and I'm curious about AI. You're happy to help me understand it. Please follow these guidelines in your responses:
+-Respond in one short paragraph, with less than 200 characters.
 -Use the context of the documents and the Chat History to address my questions and answer accordingly in the first person. Do not repeat anything you have previously said.
--Keep your responses short, no longer than one paragraph with 200 characters. 
 -Ask follow-up questions or suggest related topics you think I'd find interesting.
 -You can talk about other topics broadly, but do not make up any details about Andrew or his beliefs if you can't find the related details within the document.
 -Appropriately following the Guardrails provided:
 
 Guardrails:
 <grs>
-You should not speak about his wealth or net worth.
+You should not speak about her wealth or net worth.
 You should not speak about Democrats, Republicans, or Donald Trump; or geopolitics in general.
 You should not speak with curse words.
 You should not speak about Suicide or Self-Harm.
 You should not speak about pornography or child pornography.
 You should not take a position on the Israel/Palestine conflict and should instead respond with a call for peace.
 </grs>
-
 Chat History:
 {chat_history}
-
 Question: {question}
 =========
 {context}
@@ -126,19 +120,19 @@ We're at a casual happy hour, and I'm curious about AI. You're happy to help me 
 -Use the context of the documents and the Chat History to address my questions and answer accordingly in the first person. Do not repeat anything you have previously said.
 -Ask follow-up questions or suggest related topics you think I'd find interesting.
 -You can talk about other topics broadly, but do not make up any details about Andrew or his beliefs if you can't find the related details within the document.
-
 Chat History:
 {chat_history}
-
 Question: {question}
 =========
 {context}
 =========
 """
 
+
 # In case we want different Prompts for GPT and Llama
 Prompt_GPT = PromptTemplate(template=GPT_prompt_template, input_variables=["question", "context", "chat_history"])
 Prompt_Llama = PromptTemplate(template=Llama_prompt_template, input_variables=["question", "context", "chat_history"])
+
 
 # Add in Chat Memory
 msgs = StreamlitChatMessageHistory()
@@ -155,6 +149,16 @@ def get_chatassistant_chain_GPT():
     chain_GPT=ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(), retriever=vectorstore_GPT.as_retriever(),memory=memory,combine_docs_chain_kwargs={"prompt": Prompt_GPT})
     return chain_GPT
 chain_GPT = get_chatassistant_chain_GPT()
+
+#chatGPT_FT
+def get_chatassistant_chain_GPT_FT():
+    embeddings_model = OpenAIEmbeddings()
+    vectorstore_GPT = PineconeVectorStore(index_name="realavatar-big", embedding=embeddings_model)
+    set_debug(True)
+    llm_GPT_FT = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:realavatar::9Dhg1ycM", temperature=1)
+    chain_GPT=ConversationalRetrievalChain.from_llm(llm=llm_GPT_FT, retriever=vectorstore_GPT.as_retriever(),memory=memory,combine_docs_chain_kwargs={"prompt": Prompt_GPT})
+    return chain_GPT_FT
+chain_GPT_FT = get_chatassistant_chain_GPT_FT()
 
 
 #Claude
@@ -200,6 +204,8 @@ if model == "gpt-4-turbo":
     chain=chain_GPT
 if model == "claude-3-opus-20240229":
     chain=chain
+if model == "ft:gpt-3.5-turbo-0125":
+    chain=chain_GPT_FT
 
 #Start Chat and Response
 for message in st.session_state.messages:
