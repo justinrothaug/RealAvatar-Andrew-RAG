@@ -52,7 +52,7 @@ assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30N
 with st.sidebar:   
     st.markdown("# Chat Options")
     # model names - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
-    model = st.selectbox('What model would you like to use?',('gpt-4-turbo','claude-3-opus-20240229', 'llama-2-70b-chat', 'ft:gpt-3.5-turbo-0125'))
+    model = st.selectbox('What model would you like to use?',('gpt-4-turbo','claude-3-opus-20240229', 'llama-2-70b-chat'))
 
 
 # Define our Prompt for GPT
