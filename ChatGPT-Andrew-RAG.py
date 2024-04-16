@@ -45,8 +45,9 @@ client= OpenAI(api_key= os.environ["OPENAI_API_KEY"])
 chat= ChatOpenAI(openai_api_key= os.environ["OPENAI_API_KEY"])
 
 #Set up the Environment
-st.set_page_config(page_title="Andrew AI")
+st.set_page_config(page_title="Andrew AI", layout="centered")
 assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
+
 
 # Sidebar to select LLM
 with st.sidebar:   
@@ -187,7 +188,6 @@ chain_Llama = get_chatassistant_chain_Llama()
 #mistralai/mixtral-8x7b-instruct-v0.1:cf18decbf51c27fed6bbdc3492312c1c903222a56e3fe9ca02d6cbe5198afc10
 #nateraw/nous-hermes-2-solar-10.7b:1e918ab6ffd5872c21fba21a511f344fd12ac0edff6302c9cd260395c7707ff4
 
-st.set_page_config(layout="centered")
 col1, col2 = st.columns([3, 5])
 
 video_html = """
