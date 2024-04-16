@@ -191,7 +191,7 @@ col1, col2 = st.columns([1, 1])
 video_html = """
 <video controls width="250" autoplay="true" muted="true" loop="true">
 <source 
-            src="https://ugc-idle.s3-us-west-2.amazonaws.com/est_ee19870f47177fa1f2f7d72fb9dfb5d1.mp4" 
+            src="https://ugc-idle.s3-us-west-2.amazonaws.com/est_c2800a54688b28aa6a87e359a23e6eea.mp4" 
             type="video/mp4" />
 </video>"""
 col2.markdown(video_html, unsafe_allow_html=True)
