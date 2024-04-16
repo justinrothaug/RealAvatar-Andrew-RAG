@@ -45,7 +45,7 @@ client= OpenAI(api_key= os.environ["OPENAI_API_KEY"])
 chat= ChatOpenAI(openai_api_key= os.environ["OPENAI_API_KEY"])
 
 #Set up the Environment
-st.set_page_config(page_title="Andrew AI", layout="centered")
+st.set_page_config(page_title="Andrew AI", layout="wide")
 assistant_logo = 'https://pbs.twimg.com/profile_images/733174243714682880/oyG30NEH_400x400.jpg'
 
 
