@@ -187,7 +187,8 @@ chain_Llama = get_chatassistant_chain_Llama()
 #mistralai/mixtral-8x7b-instruct-v0.1:cf18decbf51c27fed6bbdc3492312c1c903222a56e3fe9ca02d6cbe5198afc10
 #nateraw/nous-hermes-2-solar-10.7b:1e918ab6ffd5872c21fba21a511f344fd12ac0edff6302c9cd260395c7707ff4
 
-col1, col2 = st.columns([1, 1])
+st.set_page_config(layout="centered")
+col1, col2 = st.columns([3, 5])
 video_html = """
 <video controls width="250" autoplay="true" muted="true" loop="true">
 <source 
@@ -196,63 +197,67 @@ video_html = """
 </video>"""
 col2.markdown(video_html, unsafe_allow_html=True)
 
-# Chat Mode
-#Intro and set-up the Chat History
-if "messages" not in st.session_state.keys():
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Hello!👋 I'm Andrew Ng, a professor at Stanford University specializing in AI. How can I help you today?"}
-    ]
-if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
-    msgs.clear()
+ # Voice Search Setup
+with col1:
+    state = st.session_state
+    if 'text_received' not in state:
+        state.text_received = []
+    text = speech_to_text(language='en', use_container_width=False, just_once=True, key='STT')
 
-#Define what chain to run based on the model selected
-if model == "llama-2-70b-chat":
-    chain=chain_Llama
-if model == "gpt-4-turbo":
-    chain=chain_GPT
-if model == "claude-3-opus-20240229":
-    chain=chain
-if model == "ft:gpt-3.5-turbo-0125":
-    chain=chain_GPT_FT
-
-#Start Chat and Response
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
- 
- # Voice Search
-state = st.session_state
-if 'text_received' not in state:
-    state.text_received = []
-text = speech_to_text(language='en', use_container_width=False, just_once=True, key='STT')
-if text:
-    state.text_received.append(text)
-    user_prompt = text
-
-    with st.chat_message("user"):
-        st.markdown(user_prompt)
-
-    with st.chat_message("assistant", avatar=assistant_logo):
-        message_placeholder = st.empty()
-        response = chain.invoke({"question": user_prompt})
-        message_placeholder.markdown(response['answer'])        
-    st.session_state.messages.append({"role": "assistant", "content": response['answer']})
-
-
- # Text Search
-if user_prompt := st.chat_input("What is up?"):
-    st.session_state.messages.append({"role": "user", "content": user_prompt})
-    with st.chat_message("user"):
-        st.markdown(user_prompt)
-
-    with st.chat_message("assistant", avatar=assistant_logo):
-        message_placeholder = st.empty()
-        response = chain.invoke({"question": user_prompt})
-        message_placeholder.markdown(response['answer'])        
-    st.session_state.messages.append({"role": "assistant", "content": response['answer']})
-
-
- #ElevelLabs API Call and Return
-        #text = str(response['answer'])
-        #audio = client2.generate(text=text,voice="Justin",model="eleven_multilingual_v2")
-        #play(audio)
+with col2:
+    # Chat Mode
+    #Intro and set-up the Chat History
+    if "messages" not in st.session_state.keys():
+        st.session_state.messages = [
+            {"role": "assistant", "content": "Hello!👋 I'm Andrew Ng, a professor at Stanford University specializing in AI. How can I help you today?"}
+        ]
+    if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
+        msgs.clear()
+    
+    #Define what chain to run based on the model selected
+    if model == "llama-2-70b-chat":
+        chain=chain_Llama
+    if model == "gpt-4-turbo":
+        chain=chain_GPT
+    if model == "claude-3-opus-20240229":
+        chain=chain
+    if model == "ft:gpt-3.5-turbo-0125":
+        chain=chain_GPT_FT
+    
+    #Start Chat and Response
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+     
+    
+    if text:
+        state.text_received.append(text)
+        user_prompt = text
+    
+        with st.chat_message("user"):
+            st.markdown(user_prompt)
+    
+        with st.chat_message("assistant", avatar=assistant_logo):
+            message_placeholder = st.empty()
+            response = chain.invoke({"question": user_prompt})
+            message_placeholder.markdown(response['answer'])        
+        st.session_state.messages.append({"role": "assistant", "content": response['answer']})
+    
+    
+     # Text Search
+    if user_prompt := st.chat_input("What is up?"):
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
+        with st.chat_message("user"):
+            st.markdown(user_prompt)
+    
+        with st.chat_message("assistant", avatar=assistant_logo):
+            message_placeholder = st.empty()
+            response = chain.invoke({"question": user_prompt})
+            message_placeholder.markdown(response['answer'])        
+        st.session_state.messages.append({"role": "assistant", "content": response['answer']})
+    
+    
+     #ElevelLabs API Call and Return
+            #text = str(response['answer'])
+            #audio = client2.generate(text=text,voice="Justin",model="eleven_multilingual_v2")
+            #play(audio)
