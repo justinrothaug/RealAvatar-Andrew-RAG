@@ -203,7 +203,7 @@ with col1:
     state = st.session_state
     if 'text_received' not in state:
         state.text_received = []
-    text = speech_to_text(language='en', use_container_width=False, just_once=True, key='STT')
+    text = speech_to_text(language='en', use_container_width=True, just_once=True, key='STT')
 
 with col2:
     # Chat Mode
