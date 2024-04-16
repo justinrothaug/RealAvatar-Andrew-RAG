@@ -187,7 +187,14 @@ chain_Llama = get_chatassistant_chain_Llama()
 #mistralai/mixtral-8x7b-instruct-v0.1:cf18decbf51c27fed6bbdc3492312c1c903222a56e3fe9ca02d6cbe5198afc10
 #nateraw/nous-hermes-2-solar-10.7b:1e918ab6ffd5872c21fba21a511f344fd12ac0edff6302c9cd260395c7707ff4
 
-
+col1, col2 = st.columns([1, 1])
+video_html = """
+<video controls width="250" autoplay="true" muted="true" loop="true">
+<source 
+            src="https://ugc-idle.s3-us-west-2.amazonaws.com/est_ee19870f47177fa1f2f7d72fb9dfb5d1.mp4" 
+            type="video/mp4" />
+</video>"""
+col2.markdown(video_html, unsafe_allow_html=True)
 
 # Chat Mode
 #Intro and set-up the Chat History
