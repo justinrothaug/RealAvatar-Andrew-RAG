@@ -189,13 +189,14 @@ chain_Llama = get_chatassistant_chain_Llama()
 
 st.set_page_config(layout="centered")
 col1, col2 = st.columns([3, 5])
+
 video_html = """
 <video controls width="250" autoplay="true" muted="true" loop="true">
 <source 
             src="https://ugc-idle.s3-us-west-2.amazonaws.com/est_c2800a54688b28aa6a87e359a23e6eea.mp4" 
             type="video/mp4" />
 </video>"""
-col2.markdown(video_html, unsafe_allow_html=True)
+col1.markdown(video_html, unsafe_allow_html=True)
 
  # Voice Search Setup
 with col1:
