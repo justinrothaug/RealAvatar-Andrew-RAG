@@ -250,7 +250,18 @@ if text:
     with st.chat_message("assistant", avatar=assistant_logo):
         message_placeholder = st.empty()
         response = chain.invoke({"question": user_prompt})
-        message_placeholder.markdown(response['answer'])        
+        message_placeholder.markdown(response['answer']) 
+                
+         #ElevelLabs API Call and Return
+        text = str(response['answer'])
+        audio = client2.generate(text=text,voice="Andrew",model="eleven_turbo_v2")
+        # Create single bytes object from the returned generator.
+        data = b"".join(audio)
+        ##send data to audio tag in HTML
+        audio_base64 = base64.b64encode(data).decode('utf-8')
+        audio_tag = f'<audio autoplay="true" src="data:audio/wav;base64,{audio_base64}">'     
+        st.markdown(audio_tag, unsafe_allow_html=True)
+                
     st.session_state.messages.append({"role": "assistant", "content": response['answer']})
 
 
@@ -264,10 +275,16 @@ if user_prompt := st.chat_input("What is up?"):
         message_placeholder = st.empty()
         response = chain.invoke({"question": user_prompt})
         message_placeholder.markdown(response['answer'])        
+                
+         #ElevelLabs API Call and Return
+        text = str(response['answer'])
+        audio = client2.generate(text=text,voice="Andrew",model="eleven_turbo_v2")
+        # Create single bytes object from the returned generator.
+        data = b"".join(audio)
+        ##send data to audio tag in HTML
+        audio_base64 = base64.b64encode(data).decode('utf-8')
+        audio_tag = f'<audio autoplay="true" src="data:audio/wav;base64,{audio_base64}">'     
+        st.markdown(audio_tag, unsafe_allow_html=True)
+                
     st.session_state.messages.append({"role": "assistant", "content": response['answer']})
 
-
- #ElevelLabs API Call and Return
-        #text = str(response['answer'])
-        #audio = client2.generate(text=text,voice="Justin",model="eleven_multilingual_v2")
-        #play(audio)
