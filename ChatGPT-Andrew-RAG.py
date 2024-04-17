@@ -64,10 +64,11 @@ with st.sidebar:
     st.markdown(video_html, unsafe_allow_html=True)
     
     # Voice Search Setup
+    text = speech_to_text(language='en', use_container_width=True, just_once=True, key='STT')
     state = st.session_state
     if 'text_received' not in state:
         state.text_received = []
-        text = speech_to_text(language='en', use_container_width=True, just_once=True, key='STT')
+        
         
     # model names - https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
     model = st.selectbox('What model would you like to use?',('gpt-4-turbo','claude-3-opus-20240229', 'llama-2-70b-chat'))
