@@ -43,6 +43,8 @@ REPLICATE_API_TOKEN= os.environ['REPLICATE_API_TOKEN']
 OPENAI_API_KEY= os.environ["OPENAI_API_KEY"]
 client= OpenAI(api_key= os.environ["OPENAI_API_KEY"])
 chat= ChatOpenAI(openai_api_key= os.environ["OPENAI_API_KEY"])
+ELEVEN_LABS_API_KEY= os.environ["ELEVEN_LABS_API_KEY"]
+client2= ElevenLabs(api_key= os.environ["ELEVEN_LABS_API_KEY"])
 
 #Set up the Environment
 st.set_page_config(page_title="Andrew AI", layout="wide")
