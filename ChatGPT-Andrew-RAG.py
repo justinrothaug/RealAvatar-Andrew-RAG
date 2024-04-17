@@ -240,7 +240,7 @@ for message in st.session_state.messages:
  
 
 if text:
-    state.text_received.append(text)
+    #state.text_received.append(text)
     user_prompt = text
 
     with st.chat_message("user"):
