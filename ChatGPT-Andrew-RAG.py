@@ -319,9 +319,9 @@ if text:
         cleaned = re.sub(r'\*.*?\*', '', text)
         message_placeholder.markdown(cleaned) 
                 
-         #ElevelLabs API Call and Return
-        text = str(response['answer'])
-        audio = client2.generate(text=text,voice="Andrew",model="eleven_turbo_v2")
+        #ElevelLabs API Call and Return
+         #Get ElevenLabs audio
+        audio = client2.generate(text=cleaned,voice="Andrew",model="eleven_turbo_v2")
         # Create single bytes object from the returned generator.
         data = b"".join(audio)
         ##send data to audio tag in HTML
@@ -345,9 +345,9 @@ if user_prompt := st.chat_input("What is up?"):
         cleaned = re.sub(r'\*.*?\*', '', text)
         message_placeholder.markdown(cleaned)        
                 
-         #ElevelLabs API Call and Return
-        text = str(response['answer'])
-        audio = client2.generate(text=text,voice="Andrew",model="eleven_turbo_v2")
+        #ElevelLabs API Call and Return
+         #Get ElevenLabs audio
+        audio = client2.generate(text=cleaned,voice="Andrew",model="eleven_turbo_v2")
         # Create single bytes object from the returned generator.
         data = b"".join(audio)
         ##send data to audio tag in HTML
