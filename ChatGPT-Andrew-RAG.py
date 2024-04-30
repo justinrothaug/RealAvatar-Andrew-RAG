@@ -48,8 +48,7 @@ client= OpenAI(api_key= os.environ["OPENAI_API_KEY"])
 chat= ChatOpenAI(openai_api_key= os.environ["OPENAI_API_KEY"])
 ELEVEN_LABS_API_KEY= os.environ["ELEVEN_LABS_API_KEY"]
 client2= ElevenLabs(api_key= os.environ["ELEVEN_LABS_API_KEY"])
-GRADIENT_ACCESS_TOKEN=os.environ["GRADIENT_ACCESS_TOKEN"]
-GRADIENT_WORKSPACE_ID=os.environ["GRADIENT_WORKSPACE_ID"]
+
 os.environ["LANGCHAIN_TRACING_V2"]="true"
 os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]="ls__f58fcca57d5b430998efab563129b779"
